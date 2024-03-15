@@ -1,0 +1,12 @@
+<h1 id="navbar">jfksgdfla</h1>
+<section >
+<h1>
+sdhgf
+</h1>
+<div class="project-tile">jfdsjgfffffhdsdfs</div>
+
+</section>
+<h2 id="projects">
+fdzhgh
+<a id="profile-link" class="project-tile">kfd</a>
+</h2>
