@@ -1,84 +1,48 @@
-**HTML Validator in C++**
+# HTML Validation Tool Documentation
 
-**Purpose**:
+## Introduction
 
-  The HTML Validator, written in C++ programming language, is designed to parse the HTML code, extract information about various HTML elements (tags), and perform validation checks based on specific criteria.
+The HTML Validation Tool is a C++ program designed to analyze HTML code and perform validation checks on its structure and attributes. The tool processes the HTML code, builds a tree structure representing the hierarchy of HTML tags, and checks for the presence of specific elements and attributes according to predefined validation criteria.
 
-**Components**:
+## Features
 
-  1.	TagInfo Structure:
+- **Parsing HTML**: The tool parses HTML code to identify and extract information about HTML tags, including tag names, attributes, and text content.
+- **Building Tag Tree**: The program builds a tree structure to represent the hierarchy of HTML tags, with each node in the tree representing an HTML tag and its attributes.
+- **Validation Checks**: Various validation checks are performed on the HTML code, including:
+  - Presence of specific sections (e.g., "Welcome" section, "Projects" section).
+  - Structure of HTML elements (e.g., presence of h1 tags within specific sections).
+  - Attributes of HTML elements (e.g., presence of specific IDs, classes, href attributes).
+- **Output Results**: After processing the HTML code and performing validation checks, the tool outputs the results of these checks, indicating whether each check passed or failed.
 
-    •	The TagInfo structure represents information about an HTML tag. It contains members such as tagName, id, classes, text, href, target, and children.
-    
-    •	TAGNAME: Stores the name of the HTML tag (e.g., "div", "a", "h1").
-    
-    •	ID: Stores the ID attribute of the tag, if present.
-    
-    •	Classes: Stores a set of class names associated with the tag, if present.
-    
-    •	TEXT: Stores the text content within the tag.
-    
-    •	HREF: Stores the value of the "href" attribute for anchor tags (<a>).
-    
-    •	TARGET: Stores the value of the "target" attribute for anchor tags.
-    
-    •	CHILDREN: Stores pointers to child tags of the current tag.
-  
-  **2.	Utility Functions**:
-  
-    •	ltrim, rtrim, and trim: These functions trim leading and trailing whitespace characters from a string.
- 
-    •	extractHREF: Function used to extract the “href” attribute from a string representing an HTML tag.
-    
-    •	extractTarget: Function used to extract the “target” attribute from an HTML tag in a string.
-    
-    •	extractID: Function used to extract the “ID” attribute from an HTML tag in a string.
-    
-    •	extractClasses: Function used to extract the “class” attribute from an HTML tag in a string.
-    
-    •	extractTagName: Function used to extract the “tag name” attribute from an HTML tag in a string.
-    
-    •	extractText: Function used to extract the “text content” attribute from an HTML tag in a string.
+## Components
 
-  **3.	Parsing HTML Code**:
-    
-    •	The extractCode function parses the HTML code line by line from standard input.
-    
-    •	This function identifies the opening, closing, and self-closing tags. A tree-like structure is constructed, representing the hierarchy of HTML elements.
+The HTML Validation Tool consists of the following components:
 
-    •	It populates instances of the TagInfo structure containing information about each tag.
-  
-  **4.	Validation Checks**:
-    
-    •	The validation function recursively traverses the tag tree and performs validation checks based on specific criteria.
-    
-    •	It checks for the presence of specific attributes (e.g., "id", "href") and content (e.g., text within <h1> tags).
-    
-    •	Validation checks are performed by updating a vector check with binary values (1 for pass, 0 for fail) corresponding to each criterion.
- 
-  **Main Function**:
+1. **Main Program**: The main program is responsible for coordinating the overall process, including reading input, parsing HTML code, performing validation checks, and outputting results.
 
-    •	The main function orchestrates the overall execution of the program.
-    
-    •	It initializes necessary variables, sets up input and output redirection, invokes the HTML parsing, and invokes the          validation function. Then, finally, it outputs the results of validation checks.
-  
-  **How to Use**:
-    
-    1. Prepare an HTML file to be validated.
-    
-    2. Redirect the input of the program to read from the HTML file.
-    
-    3. Run the program.
-    
-    4. Check the output to see the results of the validation checks.
+2. **HTML Tag Structure**: The program defines a structure `TagInfo` to represent information about HTML tags. This structure includes members such as tag name, classes, ID, text content, and child tags.
 
-  **Example**:
-    
-    Suppose we have an HTML file with various elements such as <h1>, <a>, <div>, etc. The program will parse the HTML code,      extract information about each tag, and perform validation checks based on specific criteria defined in the code.
+3. **Parsing Functions**: Functions are provided to parse HTML code and extract information about tags, attributes, and text content. These functions handle the extraction of tag names, IDs, classes, href attributes, and text content.
 
-  **Limitations and Considerations**:
+4. **Validation Functions**: Validation functions are implemented to perform specific checks on the structure and attributes of HTML elements. These functions analyze the tag tree and attribute values to determine if the HTML code meets the validation criteria.
 
-    1. The program assumes well-formed HTML code and may not gracefully handle all edge cases or malformed HTML.
-    
-    2. Validation criteria are predefined in the code and may need to be adjusted based on specific requirements or standard
+5. **String Searching Algorithms**: The program utilizes the Knuth-Morris-Pratt (KMP) string searching algorithm to efficiently search for specific patterns within strings.
 
+## Usage
+
+1. **Input**: The HTML code to be validated is provided as input to the program. This input can be read from a file or entered interactively.
+
+2. **Processing**: The program processes the HTML code, parses it to build a tag tree, and performs validation checks according to predefined criteria.
+
+3. **Output**: The results of the validation checks are outputted, indicating whether each validation criterion passed or failed. Additionally, any errors or warnings encountered during processing are reported.
+
+## Dependencies
+
+The HTML Validation Tool requires the following dependencies:
+
+- Standard C++ libraries (`<iostream>`, `<string>`, `<vector>`, `<sstream>`, `<set>`)
+- Knuth-Morris-Pratt (KMP) string searching algorithm implementation
+
+## Conclusion
+
+The HTML Validation Tool provides a robust solution for analyzing and validating HTML code. By parsing HTML, building a tag tree, and performing validation checks, the tool ensures that HTML documents adhere to specified structural and attribute requirements.
