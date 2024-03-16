@@ -22,11 +22,13 @@ The HTML Validation Tool consists of the following components:
 
 2. **HTML Tag Structure**: The program defines a structure `TagInfo` to represent information about HTML tags. This structure includes members such as tag name, classes, ID, text content, and child tags.
 
-3. **Parsing Functions**: Functions are provided to parse HTML code and extract information about tags, attributes, and text content. These functions handle the extraction of tag names, IDs, classes, href attributes, and text content.
+3. **Remove Comments**: The Program first remove all comments in the file.
 
-4. **Validation Functions**: Validation functions are implemented to perform specific checks on the structure and attributes of HTML elements. These functions analyze the tag tree and attribute values to determine if the HTML code meets the validation criteria.
+4. **Parsing Functions**: Functions are provided to parse HTML code and extract **multilined** information about tags, attributes, and text content. These functions handle the extraction of tag names, IDs, classes, href attributes, and text content.
 
-5. **String Searching Algorithms**: The program utilizes the Knuth-Morris-Pratt (KMP) string searching algorithm to efficiently search for specific patterns within strings.
+5. **Validation Functions**: Validation functions are implemented to perform specific checks on the structure and attributes of HTML elements. These functions analyze the tag tree and attribute values to determine if the HTML code meets the validation criteria.
+
+6. **String Searching Algorithms**: The program utilizes the Knuth-Morris-Pratt (KMP) string searching algorithm to efficiently search for specific patterns within strings.
 
 ## Usage
 
