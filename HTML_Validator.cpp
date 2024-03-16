@@ -1,19 +1,19 @@
 #include <bits/stdc++.h> // Include all necessary C++ standard libraries
 
 using namespace std;
-
-vector<int> checks;																				  // Vector to store validation checks results
+stringstream CODE; // stringstream to hold the HTML code
+vector<int> checks; // Vector to store validation checks results
 int welcomeSection, h1TagText, projectSection, projectTileClass, navBarId, textTillNow, styleTag; // Variables to track different sections and elements in HTML
 
 // Structure to represent HTML tag information
 struct TagInfo
 {
-	string tagName;				// Tag name (e.g., "div", "a", "h1")
-	set<string> classes;		// Set of class names associated with the tag
-	string id;					// ID attribute of the tag
-	string text;				// Text content within the tag
-	string href;				// href attribute value for anchor tags
-	string target;				// target attribute value for anchor tags
+	string tagName; // Tag name (e.g., "div", "a", "h1")
+	set<string> classes; // Set of class names associated with the tag
+	string id; // ID attribute of the tag
+	string text; // Text content within the tag
+	string href; // href attribute value for anchor tags
+	string target; // target attribute value for anchor tags
 	vector<TagInfo *> children; // Vector of child tags
 
 	// Constructors to initialize members
@@ -165,13 +165,8 @@ set<string> extractClasses(const string &line)
 // Function to extract the tag name from a string representing an HTML tag
 string extractTagName(const string &line)
 {
-	size_t start = line.find('<') + 1;
-	size_t end = line.find_first_of(" >", start);
-	if (start == 0)
-	{
-		return "";
-	}
-	return line.substr(start, end - start);
+	size_t start = line.find(' ');
+	return line.substr(0, start);
 }
 
 // Function to extract the text content from a string representing an HTML tag
@@ -182,61 +177,140 @@ string extractText(const string &line)
 	return line.substr(start, end - start);
 }
 
-// Function to parse the HTML code and build the tag tree
-void extractCode(TagInfo *root)
+// Function to remove comments from the HTML code
+string removeComments()
 {
-	stack<TagInfo *> topTag;
-	TagInfo *currentTag = root;
-	string line;
+	string code = "", line;
 	while (getline(cin, line))
-	{	// Read HTML code line by line from standard input
-		string tagName = extractTagName(line);
-		string id = extractID(line);
-		set<string> classes = extractClasses(line);
-		string text = extractText(line);
-		string href = extractHREF(line);
-		string target = extractTarget(line);
-
-		// Check if the tag is self-closing
-		if (line.find("<" + tagName + " />") != string::npos)
+	{
+		if (line.find("<!--") == string::npos)
 		{
-			// Create a new TagInfo object for the self-closing tag
-			TagInfo *newTagInfo = new TagInfo();
-			newTagInfo->id = id;
-			newTagInfo->classes = classes;
-			newTagInfo->tagName = tagName;
-			newTagInfo->href = href;
-			newTagInfo->target = target;
-			currentTag->children.push_back(newTagInfo);
-			currentTag->text += text;
-		}
-		// Check if the tag is a closing tag
-		else if (tagName != "" and tagName[0] == '/')
-		{
-			currentTag = topTag.top();
-			topTag.pop();
-		}
-		// Check if the tag is an opening tag
-		else if (tagName != "")
-		{
-			// Create a new TagInfo object for the opening tag
-			TagInfo *newTagInfo = new TagInfo();
-			newTagInfo->id = id;
-			newTagInfo->classes = classes;
-			newTagInfo->tagName = tagName;
-			newTagInfo->text += text;
-			newTagInfo->href = href;
-			newTagInfo->target = target;
-			currentTag->children.push_back(newTagInfo);
-			topTag.push(currentTag);
-			currentTag = newTagInfo;
-		}
-		// If the line does not contain a tag, simply append its text content to the current tag's text
-		else
-		{
-			currentTag->text += text;
+			code += line;
+			code += '\n';
+			while (getline(cin, line) && line.find("<!--") == string::npos)
+			{
+				code += line;
+				code += '\n';
+			}
+			if (line.find("<!--") != string::npos)
+			{
+				code += line.substr(0, line.find("<!--"));
+				code += '\n';
+				line = line.substr(line.find("<!--") + 2);
+				if (line.find("-->") == string::npos)
+				{
+					while (getline(cin, line) && line.find("-->") == string::npos)
+					{
+					}
+					line = line.substr(line.find("-->") + 3);
+					code += line;
+					code += '\n';
+				}
+			}
 		}
 	}
+	return code;
+}
+
+// Function to parse the HTML code and build the tag tree
+void extractCode(TagInfo *root, string prev = "")
+{
+	TagInfo *currentTag = root;
+	string line;
+	string text = "";
+	if (prev != "")
+	{
+		if (prev.find('<') != string::npos)
+		{
+			int start = prev.find('<');
+			text += prev.substr(0, start);
+			string temp = prev.substr(start + 1);
+			if (temp.find('>') == string::npos)
+			{
+				while (getline(CODE, line) && line.find('>') == string::npos)
+				{
+					temp += line;
+				}
+			}
+			int end = temp.find('>');
+			string newtag = temp.substr(0, end);
+			if (newtag[0] == '/')
+			{
+				currentTag->text += text;
+				return;
+			}
+
+			TagInfo *newTagInfo = new TagInfo();
+
+			string tagName = extractTagName(newtag);
+			string id = extractID(newtag);
+			set<string> classes = extractClasses(newtag);
+			string href = extractHREF(newtag);
+			string target = extractTarget(newtag);
+			newTagInfo->href = href;
+			newTagInfo->target = target;
+
+			newTagInfo->tagName = tagName;
+			newTagInfo->id = id;
+			newTagInfo->classes = classes;
+
+			currentTag->children.push_back(newTagInfo);
+			extractCode(newTagInfo, trim(temp.substr(end + 1)));
+		}
+		else
+		{
+			text += prev;
+		}
+	}
+	while (getline(CODE, line))
+	{
+		if (line.find('<') == string::npos)
+		{
+			text += line;
+			while (getline(CODE, line) && line.find('<') == string::npos)
+			{
+				text += line;
+			}
+		}
+		int start = line.find('<');
+		text += line.substr(0, start);
+		string temp = line.substr(start + 1);
+		if (temp.find('>') == string::npos)
+		{
+			while (getline(CODE, line) && line.find('>') == string::npos)
+			{
+				temp += line;
+			}
+			temp += line;
+		}
+		int end = temp.find('>');
+		string newtag = temp.substr(0, end);
+		if (newtag[0] == '/')
+		{
+			currentTag->text += text;
+			return;
+		}
+
+		TagInfo *newTagInfo = new TagInfo();
+
+		string tagName = extractTagName(newtag);
+		string id = extractID(newtag);
+		set<string> classes = extractClasses(newtag);
+		string href = extractHREF(newtag);
+		string target = extractTarget(newtag);
+		newTagInfo->href = href;
+		newTagInfo->target = target;
+
+		newTagInfo->tagName = tagName;
+		newTagInfo->id = id;
+		newTagInfo->classes = classes;
+
+		currentTag->children.push_back(newTagInfo);
+
+		extractCode(newTagInfo, trim(temp.substr(end + 1)));
+	}
+
+	currentTag->text += text;
 }
 
 // Function to compute the Longest Prefix Suffix (LPS) array for the Knuth-Morris-Pratt (KMP) string searching algorithm
@@ -318,7 +392,6 @@ void validation(TagInfo *tag, int depth = 0)
 	// Perform validation checks based on tag attributes and content
 	if (tag->id == "welcome-section")
 	{
-		// cout << "yes -> " << tag->tagName << endl;
 		checks[0] = 1;
 		welcomeSection++;
 	}
@@ -417,108 +490,27 @@ int main()
 
 	// Create root TagInfo object to represent the entire HTML document
 	TagInfo *root = new TagInfo("root");
+	string code = removeComments();
+	CODE << code;
 
 	// Extract and process HTML code to build tag tree and perform validation checks
 	extractCode(root);
+
 	validation(root);
 
 	// Print validation check results
-	if (checks[0])
-	{
-		cout << (checks[0] ? "✓" : "X") << " Your portfolio contain a \"Welcome\" section with an id of welcome-section." << endl;
-	}
-	else
-	{
-		cout << (checks[0] ? "✓" : "X") << " Your portfolio don't contain a \"Welcome\" section with an id of welcome-section." << endl;
-	}
-	if (checks[1])
-	{
-		cout << (checks[1] ? "✓" : "X") << " Your #welcome-section element had an h1 element." << endl;
-	}
-	else
-	{
-		cout << (checks[1] ? "✓" : "X") << " Your #welcome-section element don't had an h1 element." << endl;
-	}
-	if (checks[2])
-	{
-		cout << (checks[2] ? "✓" : "X") << " Your portfolio don't have any empty h1 elements within #welcome-section element." << endl;
-	}
-	else
-	{
-		cout << (checks[2] ? "✓" : "X") << " Your portfolio have any empty h1 elements within #welcome-section element." << endl;
-	}
-	if (checks[3])
-	{
-		cout << (checks[3] ? "✓" : "X") << " Your portfolio have a \"Projects\" section with an id of projects." << endl;
-	}
-	else
-	{
-		cout << (checks[3] ? "✓" : "X") << " Your portfolio don't have a \"Projects\" section with an id of projects." << endl;
-	}
-	if (checks[4])
-	{
-		cout << (checks[4] ? "✓" : "X") << " Your portfolio have one(or more than one) element with a class of project-tile." << endl;
-	}
-	else
-	{
-		cout << (checks[4] ? "✓" : "X") << " Your portfolio don't have element with a class of project-tile." << endl;
-	}
-	if (checks[5])
-	{
-		cout << (checks[5] ? "✓" : "X") << " Your #projects element contain one(or more than one) 'a' element." << endl;
-	}
-	else
-	{
-		cout << (checks[5] ? "✓" : "X") << " Your #projects element don't contain 'a' element." << endl;
-	}
-	if (checks[6])
-	{
-		cout << (checks[6] ? "✓" : "X") << " Your portfolio have a navbar with an id of navbar." << endl;
-	}
-	else
-	{
-		cout << (checks[6] ? "✓" : "X") << " Your portfolio don't have a navbar with an id of navbar." << endl;
-	}
-	if (checks[7])
-	{
-		cout << (checks[7] ? "✓" : "X") << " Your #navbar element contain one 'a' element whose href attribute starts with #." << endl;
-	}
-	else
-	{
-		cout << (checks[7] ? "✓" : "X") << " Your #navbar element don't contain one 'a' element whose href attribute starts with #." << endl;
-	}
-	if (checks[8])
-	{
-		cout << (checks[8] ? "✓" : "X") << " Your portfolio have an a element with an id of profile-link." << endl;
-	}
-	else
-	{
-		cout << (checks[9] ? "✓" : "X") << " Your portfolio don't have an a element with an id of profile-link." << endl;
-	}
-	if (checks[9])
-	{
-		cout << (checks[9] ? "✓" : "X") << " Your #profile-link element have a target attribute of _blank." << endl;
-	}
-	else
-	{
-		cout << (checks[9] ? "✓" : "X") << " Your #profile-link element don't have a target attribute of _blank." << endl;
-	}
-	if (checks[10])
-	{
-		cout << (checks[10] ? "✓" : "X") << " Your portfolio used one(or more than one) media query." << endl;
-	}
-	else
-	{
-		cout << (checks[10] ? "✓" : "X") << " Your portfolio don't used one(or more than one) media query." << endl;
-	}
-	if (checks[11])
-	{
-		cout << (checks[11] ? "✓" : "X") << " Your #navbar element is at the top of the viewport." << endl;
-	}
-	else
-	{
-		cout << (checks[11] ? "✓" : "X") << " Your #navbar element is not at the top of the viewport." << endl;
-	}
+	cout << (checks[0] ? "✓" : "X") << " Your portfolio contain a \"Welcome\" section with an id of welcome-section." << endl;
+	cout << (checks[1] ? "✓" : "X") << " Your #welcome-section element had an h1 element." << endl;
+	cout << (checks[2] ? "✓" : "X") << " Your portfolio don't have any empty h1 elements within #welcome-section element." << endl;
+	cout << (checks[3] ? "✓" : "X") << " Your portfolio have a \"Projects\" section with an id of projects." << endl;
+	cout << (checks[4] ? "✓" : "X") << " Your portfolio have one(or more than one) element with a class of project-tile." << endl;
+	cout << (checks[5] ? "✓" : "X") << " Your #projects element contain one(or more than one) 'a' element." << endl;
+	cout << (checks[6] ? "✓" : "X") << " Your portfolio have a navbar with an id of navbar." << endl;
+	cout << (checks[7] ? "✓" : "X") << " Your #navbar element contain one 'a' element whose href attribute starts with #." << endl;
+	cout << (checks[8] ? "✓" : "X") << " Your portfolio have an a element with an id of profile-link." << endl;
+	cout << (checks[9] ? "✓" : "X") << " Your #profile-link element have a target attribute of _blank." << endl;
+	cout << (checks[10] ? "✓" : "X") << " Your portfolio used one(or more than one) media query." << endl;
+	cout << (checks[11] ? "✓" : "X") << " Your #navbar element is at the top of the viewport." << endl;
 
 	return 0;
 }
